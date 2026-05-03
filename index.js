@@ -1,9 +1,12 @@
 "use strict";
 
+const fs = require("fs");
 const path = require("path");
 const winston = require("winston");
 const DailyRotateFile = require("winston-daily-rotate-file");
 const { v4: uuidv4 } = require("uuid");
+
+let warnedNonAbsoluteLogRoot = false;
 
 function normalizeServiceName(name) {
   const raw = String(
@@ -12,11 +15,21 @@ function normalizeServiceName(name) {
   return raw.replace(/[^\w.-]/g, "_") || "unknown-service";
 }
 
-/** Central log directory; override with LOG_ROOT (absolute or relative path). */
+/** Central log directory; override with LOG_ROOT (must be absolute inside Docker — same path as volume RHS). */
 function resolveLogRoot() {
   const raw = process.env.LOG_ROOT;
   if (raw != null && String(raw).trim() !== "") {
-    return path.resolve(String(raw).trim());
+    const trimmed = String(raw).trim();
+    if (
+      !warnedNonAbsoluteLogRoot &&
+      !path.isAbsolute(trimmed)
+    ) {
+      warnedNonAbsoluteLogRoot = true;
+      console.warn(
+        "[@projectShell/logging-lib] LOG_ROOT must be an absolute path inside the container (e.g. /var/log/projectshell), matching docker-compose volumes. Relative values resolve under cwd and files will not appear on the host logs bind mount."
+      );
+    }
+    return path.resolve(trimmed);
   }
   return path.join(process.cwd(), "logs");
 }
@@ -88,7 +101,19 @@ function jsonPrintf(info) {
 
 function createLogger(serviceNameArg) {
   const serviceName = normalizeServiceName(serviceNameArg);
-  const baseDir = path.join(resolveLogRoot(), serviceName);
+  const root = resolveLogRoot();
+  const baseDir = path.join(root, serviceName);
+  try {
+    fs.mkdirSync(root, { recursive: true });
+    fs.mkdirSync(baseDir, { recursive: true });
+  } catch (err) {
+    console.warn(
+      "[@projectShell/logging-lib] Could not create log directories:",
+      root,
+      baseDir,
+      err.message
+    );
+  }
 
   const appRotate = new DailyRotateFile({
     dirname: baseDir,

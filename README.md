@@ -48,6 +48,8 @@ Mount one host directory on all containers and set the same `LOG_ROOT` so all mi
 
 If **`LOG_ROOT`** is unset, behavior stays **`process.cwd()/logs/<serviceName>/`** (per-process working directory).
 
+**Empty host `logs/` folder:** ensure **`LOG_ROOT=/var/log/projectshell`** (absolute, matches volume RHS). Values like **`../../logs`** apply inside the container and usually **do not** match the bind mount, so files never appear under the host **`logs/`** directory. After fixing, **`docker compose up -d --force-recreate`** and trigger at least one **`bizLogger.business`** / **`POST /api/system-logs`** so rotated files are created.
+
 Export **`resolveLogRoot()`** from this package if you need the resolved path in app code.
 
 **Docker:** compose binds **`../../logs`** → **`/var/log/projectshell`** (on a VM typically **`/home/deploy/logs`** when services live under **`/home/deploy/<service>/`**); set **`LOG_ROOT=/var/log/projectshell`** in **`config/.env.common`**.
