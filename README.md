@@ -26,7 +26,7 @@ Use the shared **`config/.env.common`** file (on a VM often **`/home/deploy/conf
 
 1. Copy **`config/.env.common.example`** → **`config/.env.common`** and fill values.
 2. Backend **`docker-compose.yml`** files load **`${ENV_COMMON_PATH:-../../config/.env.common}`** first, then `.env.staging`. That relative path works when **`config/`** sits next to each service directory (same on a flat VM deploy under **`/home/deploy/`**).
-3. Put **`LOG_ROOT=/var/log/projectshell`** in **`config/.env.common`** so it matches the default bind mount **`../../logs:/var/log/projectshell`** (host dir **`logs/`** next to **`config/`** when services are **`/home/deploy/<service>/`**).
+3. Put **`LOG_ROOT=/var/log/projectshell`** in **`config/.env.common`** so it matches the default bind mount **`../../logs:/var/log/projectshell`** (host dir **`logs/`** next to **`config/`** when services are **`/home/deploy/<service>/`**). Compose **`env_file`** injects this into the container; you do **not** need a duplicate **`environment: LOG_ROOT`** in **`docker-compose.yml`**.
 
 If compose files are not two levels below **`config/`**, set an absolute path:
 
