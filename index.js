@@ -12,6 +12,15 @@ function normalizeServiceName(name) {
   return raw.replace(/[^\w.-]/g, "_") || "unknown-service";
 }
 
+/** Central log directory; override with LOG_ROOT (absolute or relative path). */
+function resolveLogRoot() {
+  const raw = process.env.LOG_ROOT;
+  if (raw != null && String(raw).trim() !== "") {
+    return path.resolve(String(raw).trim());
+  }
+  return path.join(process.cwd(), "logs");
+}
+
 function headerValue(req, key) {
   if (!req?.headers) return null;
   const v = req.headers[key];
@@ -79,7 +88,7 @@ function jsonPrintf(info) {
 
 function createLogger(serviceNameArg) {
   const serviceName = normalizeServiceName(serviceNameArg);
-  const baseDir = path.join(process.cwd(), "logs", serviceName);
+  const baseDir = path.join(resolveLogRoot(), serviceName);
 
   const appRotate = new DailyRotateFile({
     dirname: baseDir,
@@ -370,6 +379,7 @@ function extractPayloadBusinessIds(payload) {
 
 module.exports = {
   createLogger,
+  resolveLogRoot,
   correlationIdMiddleware,
   logErrorMiddleware,
   createSystemLogsRouter,

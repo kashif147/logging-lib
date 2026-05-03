@@ -4,6 +4,10 @@
   "description": "Structured JSON logging, correlation-id and Express helpers for membership microservices",
   "main": "index.js",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kashif147/logging-lib.git"
+  },
   "engines": {
     "node": ">=18.0.0"
   },
