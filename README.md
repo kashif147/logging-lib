@@ -102,8 +102,8 @@ Payloads are enriched with `occurredAt`, `sourceService`, and UUID `eventId` whi
 ## API helpers
 
 ```javascript
-bizLogger.business("Application approved", {
-  eventType: "ApplicationApproved",
+bizLogger.business("Application processed", {
+  eventType: "ApplicationProcessed",
   applicationId: "...",
   profileId: "...",
 }, req); // optional req merges x-user-id, x-tenant-id, correlationId
